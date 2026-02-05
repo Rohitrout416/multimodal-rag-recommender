@@ -75,3 +75,24 @@ async def chat_with_rag(request: RagChatRequest):
         print(f"RAG Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# --- Milestone 4 Endpoints ---
+
+from src.services.tryon import tryon_service
+from src.models.tryon import TryOnRequest, TryOnResponse
+from src.services.trends import trend_service
+
+@app.post("/try-on", response_model=TryOnResponse)
+async def try_on(request: TryOnRequest):
+    try:
+        result_url = await tryon_service.generate_tryon(request.user_image, request.clothing_image)
+        return TryOnResponse(result_image_url=result_url)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/trends")
+async def get_trends():
+    try:
+        return trend_service.get_trends()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
