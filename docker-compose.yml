@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # Main Backend API (FastAPI)
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: fashnet-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URL=mongodb://mongo:27017
+      - MONGO_DB_NAME=fashnet
+      - MODEL_SERVICE_URL=http://ai-service:8001
+      - JWT_SECRET=${JWT_SECRET:-dev_secret_key_change_in_prod}
+    depends_on:
+      - mongo
+      - ai-service
+    networks:
+      - fashnet-network
+    volumes:
+      - ./apps/backend:/app
+
+  # AI Logic Service (FastAPI + Gemini)
+  ai-service:
+    build:
+      context: ./apps/ai-service
+      dockerfile: Dockerfile
+    container_name: fashnet-ai-service
+    ports:
+      - "8001:8001" # Internal largely, but exposed for debug
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - QDRANT_URL=http://qdrant:6333
+      - RAPIDAPI_KEY=${RAPIDAPI_KEY}
+    depends_on:
+      - qdrant
+    networks:
+      - fashnet-network
+    volumes:
+      - ./apps/ai-service:/app
+
+  # Frontend (React + Vite)
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    container_name: fashnet-frontend
+    ports:
+      - "3000:3000" # Vite default
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - fashnet-network
+    volumes:
+      - ./apps/frontend:/app
+      - /app/node_modules
+
+  # Database: MongoDB
+  mongo:
+    image: mongo:6.0
+    container_name: fashnet-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - fashnet-network
+
+  # Vector Database: Qdrant
+  qdrant:
+    image: qdrant/qdrant:v1.7.4
+    container_name: fashnet-qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    networks:
+      - fashnet-network
+
+networks:
+  fashnet-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
+  qdrant_data:
