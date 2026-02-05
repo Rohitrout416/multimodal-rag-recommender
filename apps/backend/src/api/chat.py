@@ -12,12 +12,13 @@ async def chat(
     current_user: UserResponse = Depends(deps.get_current_user)
 ):
     """
-    Chat with the AI Stylist.
+    Chat with the AI Stylist (RAG Enabled).
     Auth required.
     """
-    # Later: inject user preferences/wardrobe context into prompt
-    prompt = f"User {current_user.username} says: {request.message}\n\nYou are a helpful AI Fashion Stylist. Respond to the user."
+    # Call the RAG pipeline
+    result = await ai_client.chat_with_rag(request.message)
     
-    response_text = await ai_client.generate_response(prompt)
-    
-    return ChatResponse(response=response_text)
+    return ChatResponse(
+        response=result["response"],
+        products=result.get("products", [])
+    )

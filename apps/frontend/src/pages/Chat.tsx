@@ -4,12 +4,23 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChatMessage } from '@/components/ChatMessage';
+import { ProductCard } from '@/components/ProductCard';
 import { Send, Loader2 } from 'lucide-react';
+
+interface Product {
+    id: number;
+    name: string;
+    description: string;
+    category: string;
+    price: number;
+    image_url: string;
+}
 
 interface Message {
     text: string;
     isUser: boolean;
     timestamp: number;
+    products?: Product[];
 }
 
 export default function Chat() {
@@ -46,7 +57,8 @@ export default function Chat() {
             setMessages(prev => [...prev, {
                 text: response.data.response,
                 isUser: false,
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                products: response.data.products
             }]);
         } catch (error) {
             console.error('Failed to send message:', error);
@@ -69,13 +81,21 @@ export default function Chat() {
                     </CardTitle>
                 </CardHeader>
 
-                <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+                <CardContent className="flex-1 overflow-y-auto p-4 space-y-6">
                     {messages.map((msg, idx) => (
-                        <ChatMessage
-                            key={`${msg.timestamp}-${idx}`}
-                            message={msg.text}
-                            isUser={msg.isUser}
-                        />
+                        <div key={`${msg.timestamp}-${idx}`}>
+                            <ChatMessage
+                                message={msg.text}
+                                isUser={msg.isUser}
+                            />
+                            {msg.products && msg.products.length > 0 && (
+                                <div className="ml-4 mb-4 flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                                    {msg.products.map(product => (
+                                        <ProductCard key={product.id} product={product} />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     ))}
                     {loading && (
                         <div className="flex justify-start mb-4">

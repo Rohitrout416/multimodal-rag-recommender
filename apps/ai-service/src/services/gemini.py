@@ -36,4 +36,19 @@ class GeminiService:
             print(f"Error generating with images: {e}")
             return "I apologize, but I am unable to analyze the images at the moment."
 
+    async def embed_text(self, text: str) -> List[float]:
+        """
+        Generate embedding for text using models/embedding-001
+        """
+        try:
+            result = genai.embed_content(
+                model="models/embedding-001",
+                content=text,
+                task_type="retrieval_query"
+            )
+            return result['embedding']
+        except Exception as e:
+            print(f"Error embedding text: {e}")
+            return []
+
 gemini_service = GeminiService()
