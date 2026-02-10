@@ -4,11 +4,16 @@ from src.services.qdrant import vector_service
 from src.models.generate import GenerateRequest, GenerateResponse, RagChatRequest, RagChatResponse, Product
 import json
 
-app = FastAPI(title="FashNet AI Service")
+from contextlib import asynccontextmanager
 
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
     vector_service.ensure_collection()
+    yield
+
+app = FastAPI(title="FashNet AI Service", lifespan=lifespan)
+
 
 @app.get("/")
 def read_root():

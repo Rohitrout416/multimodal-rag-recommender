@@ -4,7 +4,7 @@ from src.services.ai_client import ai_client
 
 router = APIRouter()
 
-@router.get("/")
+@router.get("")
 async def get_trends():
     """
     Get current fashion trends.

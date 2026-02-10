@@ -1,33 +1,77 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 
+interface FieldErrors {
+    email?: string;
+    password?: string;
+    general?: string;
+}
+
 export default function Login() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    const [errors, setErrors] = useState<FieldErrors>({});
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+
+
+    const validateForm = (): boolean => {
+        const newErrors: FieldErrors = {};
+
+        if (!email) {
+            newErrors.email = 'Email is required.';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            newErrors.email = 'Please enter a valid email address.';
+        }
+
+        if (!password) {
+            newErrors.password = 'Password is required.';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (!validateForm()) return;
+
         setLoading(true);
-        setError('');
+        setErrors({});
 
         try {
-            const response = await api.post('/auth/login', { email, password });
+            const response = await api.post('auth/login', { email, password });
 
             const { access_token, user } = response.data;
 
             localStorage.setItem('token', access_token);
             localStorage.setItem('user', JSON.stringify(user));
 
-            navigate('/');
+            window.location.href = '/';
         } catch (err: any) {
-            setError(err.response?.data?.detail || 'Login failed. Please check your credentials.');
+            const detail = err.response?.data?.detail;
+            if (typeof detail === 'string') {
+                setErrors({ general: detail });
+            } else if (Array.isArray(detail)) {
+                const fieldErrors: FieldErrors = {};
+                for (const item of detail) {
+                    const field = item.loc?.[item.loc.length - 1];
+                    if (field === 'email' || field === 'password') {
+                        fieldErrors[field] = item.msg;
+                    }
+                }
+                if (Object.keys(fieldErrors).length === 0) {
+                    setErrors({ general: detail.map((e: any) => e.msg).join(', ') });
+                } else {
+                    setErrors(fieldErrors);
+                }
+            } else {
+                setErrors({ general: 'Login failed. Please check your credentials.' });
+            }
         } finally {
             setLoading(false);
         }
@@ -47,9 +91,12 @@ export default function Login() {
                                 type="email"
                                 placeholder="name@example.com"
                                 value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                onChange={(e) => { setEmail(e.target.value); if (errors.email) setErrors(prev => ({ ...prev, email: undefined })); }}
                                 required
                             />
+                            {errors.email && (
+                                <p className="text-xs text-red-500 mt-1">{errors.email}</p>
+                            )}
                         </div>
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Password</label>
@@ -57,14 +104,17 @@ export default function Login() {
                                 type="password"
                                 placeholder="••••••••"
                                 value={password}
-                                onChange={(e) => setPassword(e.target.value)}
+                                onChange={(e) => { setPassword(e.target.value); if (errors.password) setErrors(prev => ({ ...prev, password: undefined })); }}
                                 required
                             />
+                            {errors.password && (
+                                <p className="text-xs text-red-500 mt-1">{errors.password}</p>
+                            )}
                         </div>
 
-                        {error && (
+                        {errors.general && (
                             <div className="text-sm text-red-500 font-medium">
-                                {error}
+                                {errors.general}
                             </div>
                         )}
 

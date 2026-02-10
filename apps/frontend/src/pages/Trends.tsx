@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge'; // Note: standard Shadcn badge might not be set up, so we'll use standard div if fails or we need to create it. Assuming basic div for now or we can implement Badge.
+// Badge component not found, using standard styles if needed
 
 interface Trend {
     keyword: string;
@@ -18,7 +18,7 @@ export default function Trends() {
     useEffect(() => {
         const fetchTrends = async () => {
             try {
-                const response = await api.get('/trends');
+                const response = await api.get('trends');
                 setTrends(response.data);
             } catch (error) {
                 console.error('Failed to fetch trends:', error);

@@ -31,7 +31,7 @@ services:
     ports:
       - "8001:8001" # Internal largely, but exposed for debug
     environment:
-      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GOOGLE_API_KEY=AIzaSyBQN4YkIS5YcPZBOKrTzqcbjPYy4ciuGvQ
       - QDRANT_URL=http://qdrant:6333
       - RAPIDAPI_KEY=${RAPIDAPI_KEY}
     depends_on:
@@ -50,7 +50,7 @@ services:
     ports:
       - "3000:3000" # Vite default
     environment:
-      - VITE_API_URL=http://localhost:8000
+      - VITE_API_URL=http://localhost:8000/api/v1/
     depends_on:
       - backend
     networks:

@@ -36,7 +36,7 @@ export default function VirtualMirror() {
             formData.append('user_image', userImage);
             formData.append('clothing_image', clothingImage);
 
-            const response = await api.post('/try-on', formData, {
+            const response = await api.post('try-on', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 

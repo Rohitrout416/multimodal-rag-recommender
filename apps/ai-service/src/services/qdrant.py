@@ -8,7 +8,7 @@ class VectorService:
         self.qdrant_url = os.getenv("QDRANT_URL", "http://qdrant:6333")
         self.client = QdrantClient(url=self.qdrant_url)
         self.collection_name = "products"
-        self.vector_size = 768  # Gemini embedding-001 size
+        self.vector_size = 3072  # gemini-embedding-001 output size
 
     def ensure_collection(self):
         try:

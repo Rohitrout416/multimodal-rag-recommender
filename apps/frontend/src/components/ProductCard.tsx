@@ -7,7 +7,7 @@ interface Product {
     name: string;
     description: string;
     category: string;
-    price: float;
+    price: number;
     image_url: string;
 }
 

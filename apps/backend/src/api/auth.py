@@ -18,14 +18,17 @@ async def register(user_in: UserCreate, db = Depends(get_database)):
     # Hash password
     hashed_password = get_password_hash(user_in.password)
     
+    from datetime import datetime
+    
     # Create user
     user_data = {
         "email": user_in.email,
         "username": user_in.username,
         "password": hashed_password,
-        "created_at": "now", # TODO: Use datetime
+        "created_at": datetime.utcnow(),
         "preferences": {}
     }
+
     
     result = await db.users.insert_one(user_data)
     
@@ -67,6 +70,9 @@ async def login(login_data: UserLogin, db = Depends(get_database)):
         }
     }
 
+from src.api.deps import get_current_user
+
 @router.get("/me", response_model=UserResponse)
-async def read_users_me(current_user: UserResponse = Depends("src.api.deps.get_current_user")):
+async def read_users_me(current_user: UserResponse = Depends(get_current_user)):
     return current_user
+

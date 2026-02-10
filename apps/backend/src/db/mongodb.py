@@ -4,13 +4,15 @@ from src.core.config import settings
 class Database:
     client: AsyncIOMotorClient = None
 
-    def connect(self):
+    async def connect(self):
         self.client = AsyncIOMotorClient(settings.MONGO_URL)
         print("Connected to MongoDB")
 
-    def disconnect(self):
-        self.client.close()
+    async def disconnect(self):
+        if self.client:
+            self.client.close()
         print("Disconnected from MongoDB")
+
 
     def get_db(self):
         return self.client[settings.MONGO_DB_NAME]

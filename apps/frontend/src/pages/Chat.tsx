@@ -51,7 +51,7 @@ export default function Chat() {
         setMessages(prev => [...prev, { text: userMessage, isUser: true, timestamp: Date.now() }]);
 
         try {
-            const response = await api.post('/chat', { message: userMessage });
+            const response = await api.post('chat', { message: userMessage });
 
             // Add AI response
             setMessages(prev => [...prev, {

@@ -4,9 +4,20 @@ from src.core.config import settings
 from src.db.mongodb import db
 from src.api import auth, chat, tryon, trends
 
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    await db.connect()
+    yield
+    # Shutdown
+    await db.disconnect()
+
 app = FastAPI(
     title="FashNet Backend API",
-    openapi_url=f"{settings.API_V1_STR}/openapi.json"
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    lifespan=lifespan
 )
 
 # CORS
@@ -18,13 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.on_event("startup")
-async def startup_db_client():
-    db.connect()
 
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    db.disconnect()
 
 app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
 app.include_router(chat.router, prefix=f"{settings.API_V1_STR}/chat", tags=["chat"])

@@ -5,7 +5,7 @@ import base64
 
 router = APIRouter()
 
-@router.post("/", response_model=TryOnResponse)
+@router.post("", response_model=TryOnResponse)
 async def try_on(
     user_image: str = Form(...),
     clothing_image: str = Form(...)
