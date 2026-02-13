@@ -1,4 +1,4 @@
-# FashNet - Multimodal RAG Ecommerce System (Rebuild)
+# FashNet - Multimodal RAG Ecommerce System
 
 A modern, containerized reconstruction of the FashNet system, featuring AI-powered Fashion Styling, Product Retrieval (RAG), Trends Analysis, and Virtual Try-On.
 
